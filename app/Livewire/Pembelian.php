@@ -4,10 +4,10 @@ namespace App\Livewire;
 
 use Livewire\Component;
 
-class Transaksi extends Component
+class Pembelian extends Component
 {
     public function render()
     {
-        return view('livewire.transaksi');
+        return view('livewire.pembelian');
     }
 }

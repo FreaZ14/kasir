@@ -44,10 +44,12 @@
                                     class="btn {{ $pilihanMenu=='edit' ? 'btn-primary' : 'btn-outline-primary' }}">
                                     Edit Pengguna
                                 </button>
+                                @if(auth()->user()->peran!='Admin')
                                 <button wire:click="pilihHapus({{ $pengguna->id }})" 
                                     class="btn {{ $pilihanMenu=='hapus' ? 'btn-primary' : 'btn-outline-primary' }}">
                                     Hapus Pengguna
                                 </button>
+                                @endif
                                 </td>
                             </tr>
                             @endforeach
@@ -142,7 +144,9 @@
                 <div class="card-body">
                     Anda yakin akan menghapus Pengguna ini?
                     <p>Nama : {{ $penggunaTerpilih->name }}</p>
+                    @if(auth()->user()->peran!='Admin')
                     <button class="btn btn-danger" wire:click='hapus'>Hapus</button> 
+                    @endif
                     <button class="btn btn-secondary" wire:click='batal'>Batal</button> 
                 </div>
             </div>

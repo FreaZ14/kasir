@@ -101,9 +101,6 @@
                         <a href="{{ route('detail-penjualan') }}" wire:navigate class="btn {{ request()->routeIs('detail-penjualan') ? 'btn-primary' : 'btn-outline-primary' }}">
                           Detail Penjualan
                         </a>
-                        <a href="{{ route('detail-pembelian') }}" wire:navigate class="btn {{ request()->routeIs('detail-pembelian') ? 'btn-primary' : 'btn-outline-primary' }}">
-                          Detail Pembelian
-                        </a>    
                     </div>
                 </div>
             </div>

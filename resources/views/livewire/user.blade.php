@@ -61,7 +61,37 @@
                     Tambah Pengguna
                 </div>
                 <div class="card-body">
-                    test
+                    <form wire:submit='simpan'>
+                        <label>Nama</label>
+                        <input type="text" class="form-control" wire:model='nama'/>
+                        @error('nama')
+                        <span class="text-danger">{{ $message }}</span>
+                        @enderror
+<br />
+                        <label>Email</label>
+                        <input type="text" class="form-control" wire:model='email'/>
+                        @error('email')
+                        <span class="text-danger">{{ $message }}</span>
+                        @enderror
+<br />
+                        <label>Password</label>
+                        <input type="text" class="form-control" wire:model='password'/>
+                        @error('password')
+                        <span class="text-danger">{{ $message }}</span>
+                        @enderror
+<br />
+                        <label>Peran</label>
+                        <select class="form-control" wire:model='peran'>
+                            <option>--Pilih Peran--</option>
+                            <option value="Kasir">Kasir</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                        @error('peran')
+                        <span class="text-danger">{{ $message }}</span>
+                        @enderror
+<br />
+                        <button type="submit" class="btn btn-primary mt-3">Simpan</button>
+                    </form>
                 </div>
             </div>
             @elseif($pilihanMenu=='edit')

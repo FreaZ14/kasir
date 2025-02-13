@@ -1,4 +1,4 @@
-<div> 
+<div>
     <div class="container">
         <div class="row my-3">
             <div class="col-12 d-flex gap-2">
@@ -51,7 +51,7 @@
                                             <button wire:click="pilihBarang('edit', {{ $item->id }})" class="btn btn-warning btn-sm">
                                                 <i class="fas fa-edit"></i> Edit
                                             </button>
-                                            <button wire:click="pilihBarang('hapus', {{ $item->id }})" class="btn btn-danger btn-sm">
+                                            <button wire:click="hapusBarang({{ $item->id }})" class="btn btn-danger btn-sm">
                                                 <i class="fas fa-trash"></i> Hapus
                                             </button>
                                         </td>
@@ -63,13 +63,15 @@
                 </div>
             </div>
 
-        @elseif($pilihanBarang=='tambah')
+        @elseif($pilihanBarang=='tambah' || $pilihanBarang=='edit')
             <div class="row">
                 <div class="col-md-8 mx-auto">
                     <div class="card shadow-lg">
                         <div class="card-body">
-                            <h4 class="card-title mb-3">Tambah Barang</h4>
-                            <form wire:submit.prevent="tambahBarang">
+                            <h4 class="card-title mb-3">
+                                {{ $pilihanBarang == 'tambah' ? 'Tambah Barang' : 'Edit Barang' }}
+                            </h4>
+                            <form wire:submit.prevent="{{ $pilihanBarang == 'tambah' ? 'tambahBarang' : 'editBarang' }}">
                                 <div class="mb-3">
                                     <label for="nama" class="form-label">Nama</label>
                                     <input type="text" wire:model="nama" class="form-control" id="nama" placeholder="Nama Barang">
@@ -90,6 +92,18 @@
                                     <label for="keterangan" class="form-label">Keterangan</label>
                                     <textarea wire:model="keterangan" class="form-control" id="keterangan" placeholder="Keterangan"></textarea>
                                 </div>
+                                <div class="mb-3">
+                                    <label for="gambar" class="form-label">Gambar</label>
+                                    <input type="file" wire:model="gambar" class="form-control" id="gambar">
+                                    <div wire:loading wire:target="gambar">Uploading...</div>
+
+                                    @if($gambar)
+                                        <img src="{{ $gambar->temporaryUrl() }}" class="img-thumbnail mt-2" width="100">
+                                    @elseif($pilihanBarang == 'edit' && $gambarLama)
+                                        <img src="{{ asset('storage/' . $gambarLama) }}" class="img-thumbnail mt-2" width="100">
+                                    @endif
+                                </div>
+
                                 <button type="submit" class="btn btn-primary w-100">
                                     <i class="fas fa-save"></i> Simpan
                                 </button>

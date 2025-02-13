@@ -1,11 +1,15 @@
-<?php 
+<?php  
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use App\Models\Barang as BarangModel;
+use Illuminate\Support\Facades\Storage;
 
 class Barang extends Component
 {
+    use WithFileUploads;
+
     public $pilihanBarang = 'lihat';
     public $barang;
     public $nama;
@@ -15,6 +19,7 @@ class Barang extends Component
     public $keterangan;
     public $gambar;
     public $barangId;
+    public $gambarLama;
 
     public function mount()
     {
@@ -34,7 +39,7 @@ class Barang extends Component
                 $this->harga_jual = $barang->harga_jual;
                 $this->satuan = $barang->satuan;
                 $this->keterangan = $barang->keterangan;
-                $this->gambar = $barang->gambar;
+                $this->gambarLama = $barang->gambar;
             }
         } elseif ($pilih == 'tambah') {
             $this->resetInputFields();
@@ -43,13 +48,16 @@ class Barang extends Component
 
     public function tambahBarang()
     {
+        // Simpan gambar ke storage
+        $gambarPath = $this->gambar ? $this->gambar->store('barang', 'public') : null;
+
         BarangModel::create([
             'nama' => $this->nama,
             'stok' => $this->stok,
             'harga_jual' => $this->harga_jual,
             'satuan' => $this->satuan,
             'keterangan' => $this->keterangan,
-            'gambar' => $this->gambar,
+            'gambar' => $gambarPath,
         ]);
 
         session()->flash('message', 'Barang berhasil ditambahkan!');
@@ -62,13 +70,21 @@ class Barang extends Component
     {
         $barang = BarangModel::find($this->barangId);
         if ($barang) {
+            // Jika ada gambar baru, simpan ke storage
+            $gambarPath = $this->gambar ? $this->gambar->store('barang', 'public') : $this->gambarLama;
+
+            // Jika ada gambar lama dan diganti, hapus dari storage
+            if ($this->gambar && $this->gambarLama) {
+                Storage::delete('public/' . $this->gambarLama);
+            }
+
             $barang->update([
                 'nama' => $this->nama,
                 'stok' => $this->stok,
                 'harga_jual' => $this->harga_jual,
                 'satuan' => $this->satuan,
                 'keterangan' => $this->keterangan,
-                'gambar' => $this->gambar,
+                'gambar' => $gambarPath,
             ]);
 
             session()->flash('message', 'Barang berhasil diperbarui!');
@@ -82,10 +98,15 @@ class Barang extends Component
     {
         $barang = BarangModel::find($id);
         if ($barang) {
+            // Hapus gambar dari storage jika ada
+            if ($barang->gambar) {
+                Storage::delete('public/' . $barang->gambar);
+            }
             $barang->delete();
-            session()->flash('message', 'Barang berhasil dihapus!');
-            $this->barang = BarangModel::all();
         }
+
+        session()->flash('message', 'Barang berhasil dihapus!');
+        $this->barang = BarangModel::all();
     }
 
     public function resetInputFields()
@@ -96,6 +117,7 @@ class Barang extends Component
         $this->satuan = '';
         $this->keterangan = '';
         $this->gambar = '';
+        $this->gambarLama = null;
         $this->barangId = null;
     }
 

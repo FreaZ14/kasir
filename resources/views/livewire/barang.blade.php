@@ -42,7 +42,7 @@
                                         <td>{{ $item->keterangan }}</td>
                                         <td>
                                             @if($item->gambar)
-                                                <img src="{{ asset('storage/' . $item->gambar) }}" class="rounded" width="50">
+                                                <img src="{{ asset('storage/' . $item->gambar) }}" class="rounded" width="100">
                                             @else
                                                 <span class="text-muted">Tidak ada</span>
                                             @endif
@@ -98,9 +98,9 @@
                                     <div wire:loading wire:target="gambar">Uploading...</div>
 
                                     @if($gambar)
-                                        <img src="{{ $gambar->temporaryUrl() }}" class="img-thumbnail mt-2" width="100">
+                                        <img src="{{ $gambar->temporaryUrl() }}" class="img-thumbnail mt-2" width="150">
                                     @elseif($pilihanBarang == 'edit' && $gambarLama)
-                                        <img src="{{ asset('storage/' . $gambarLama) }}" class="img-thumbnail mt-2" width="100">
+                                        <img src="{{ asset('storage/' . $gambarLama) }}" class="img-thumbnail mt-2" width="150">
                                     @endif
                                 </div>
 

@@ -15,10 +15,10 @@
 
     <!-- Scripts -->
     <!-- Latest compiled and minified CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<!-- Latest compiled JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
     <div id="app">
@@ -80,30 +80,32 @@
             <div class="container">
                 <div class="row">
                     <div class="col-12">
-                        <a href="{{ route('home') }}" wire:navigate class="btn {{ request()->routeIs('home') ? 'btn-primary' : 'btn-outline-primary' }}">
-                          Beranda  
-                        </a>
-                        <a href="{{ route('user') }}" wire:navigate class="btn {{ request()->routeIs('user') ? 'btn-primary' : 'btn-outline-primary' }}">
-                          Pengguna
-                        </a>
-                        <a href="{{ route('barang') }}" wire:navigate class="btn {{ request()->routeIs('barang') ? 'btn-primary' : 'btn-outline-primary' }}">
-                          Barang
-                        </a>
-                        <a href="{{ route('pembelian') }}" wire:navigate class="btn {{ request()->routeIs('pembelian') ? 'btn-primary' : 'btn-outline-primary' }}">
-                          Pembelian
-                        </a>
-                        <a href="{{ route('penjualan') }}" wire:navigate class="btn {{ request()->routeIs('penjualan') ? 'btn-primary' : 'btn-outline-primary' }}">
-                          Penjualan
-                        </a>
-                        <a href="{{ route('laporan') }}" wire:navigate class="btn {{ request()->routeIs('laporan') ? 'btn-primary' : 'btn-outline-primary' }}">
-                          Laporan
-                        </a>
-                        <a href="{{ route('detail-penjualan') }}" wire:navigate class="btn {{ request()->routeIs('detail-penjualan') ? 'btn-primary' : 'btn-outline-primary' }}">
-                          Detail Penjualan
-                        </a>
-                        <a href="{{ route('detail-pembelian') }}" wire:navigate class="btn {{ request()->routeIs('detail-pembelian') ? 'btn-primary' : 'btn-outline-primary' }}">
-                          Detail Pembelian
-                        </a>
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Beranda</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('user') ? 'active' : '' }}" href="{{ route('user') }}">Pengguna</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('barang') ? 'active' : '' }}" href="{{ route('barang') }}">Barang</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('pembelian') ? 'active' : '' }}" href="{{ route('pembelian') }}">Pembelian</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('penjualan') ? 'active' : '' }}" href="{{ route('penjualan') }}">Penjualan</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('laporan') ? 'active' : '' }}" href="{{ route('laporan') }}">Laporan</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('detail-penjualan') ? 'active' : '' }}" href="{{ route('detail-penjualan') }}">Detail Penjualan</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('detail-pembelian') ? 'active' : '' }}" href="{{ route('detail-pembelian') }}">Detail Pembelian</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -112,3 +114,4 @@
     </div>
 </body>
 </html>
+

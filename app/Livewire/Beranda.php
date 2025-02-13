@@ -10,4 +10,10 @@ class Beranda extends Component
     {
         return view('livewire.beranda');
     }
+
+    public function selamatDatang(){
+        return 'Selamat Datang Di Toko Kami';
+    }
+    
 }
+

@@ -92,14 +92,17 @@
                         <a href="{{ route('pembelian') }}" wire:navigate class="btn {{ request()->routeIs('pembelian') ? 'btn-primary' : 'btn-outline-primary' }}">
                           Pembelian
                         </a>
-                        <a href="{{ route('laporan') }}" wire:navigate class="btn {{ request()->routeIs('laporan') ? 'btn-primary' : 'btn-outline-primary' }}">
-                          Laporan
-                        </a>
                         <a href="{{ route('penjualan') }}" wire:navigate class="btn {{ request()->routeIs('penjualan') ? 'btn-primary' : 'btn-outline-primary' }}">
                           Penjualan
                         </a>
+                        <a href="{{ route('laporan') }}" wire:navigate class="btn {{ request()->routeIs('laporan') ? 'btn-primary' : 'btn-outline-primary' }}">
+                          Laporan
+                        </a>
                         <a href="{{ route('detail-penjualan') }}" wire:navigate class="btn {{ request()->routeIs('detail-penjualan') ? 'btn-primary' : 'btn-outline-primary' }}">
                           Detail Penjualan
+                        </a>
+                        <a href="{{ route('detail-pembelian') }}" wire:navigate class="btn {{ request()->routeIs('detail-pembelian') ? 'btn-primary' : 'btn-outline-primary' }}">
+                          Detail Pembelian
                         </a>
                     </div>
                 </div>

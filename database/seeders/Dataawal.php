@@ -19,5 +19,12 @@ class Dataawal extends Seeder
         $user->password = bcrypt('12345');
         $user->peran = 'Admin';
         $user->save();
+
+        $user = new User ();
+        $user->name = 'Kasir';
+        $user->email = 'kasir@gmail.com';
+        $user->password = bcrypt('123321');
+        $user->peran = 'Kasir';
+        $user->save();
     }
 }

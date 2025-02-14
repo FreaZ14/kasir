@@ -96,15 +96,7 @@
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('penjualan') ? 'active' : '' }}" href="{{ route('penjualan') }}">Penjualan</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('laporan') ? 'active' : '' }}" href="{{ route('laporan') }}">Laporan</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('detail-penjualan') ? 'active' : '' }}" href="{{ route('detail-penjualan') }}">Detail Penjualan</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('detail-pembelian') ? 'active' : '' }}" href="{{ route('detail-pembelian') }}">Detail Pembelian</a>
-                            </li>
+                        
                         </ul>
                     </div>
                 </div>

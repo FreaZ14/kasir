@@ -1,77 +1,93 @@
 <?php
-
 namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Pembelian as PembelianModel;
-use App\Models\DetailPembelian as DetailPembelianModel;
-use App\Models\Barang as BarangModel;
+use Illuminate\Support\Facades\Auth;
 
 class Pembelian extends Component
 {
-    public $pembelian;
-    public $pilihanPembelian = 'lihat';
-    public $detailPembelian;
-    public $barang;
-    public $selectedBarang;
-    public $qty;
-    public $total;
+    public $nama_barang, $jumlah, $total;
+    public $detailPembelian = [];
+    public $pilihanPembelian = 'tambah';
     public $no_faktur;
     public $tanggal;
+    public $editId;
 
     public function mount()
     {
-        $this->pembelian = PembelianModel::all();
-        $this->barang = BarangModel::all();
-        $this->no_faktur = 'INV' . now()->format('YmdHis');
-        $this->tanggal = now()->toDateString();
-
+        $this->detailPembelian = $this->getDetailPembelian();
+        $this->generateNoFaktur();
+        $this->tanggal = now()->format('Y-m-d');
     }
 
-    public function pilihPembelian($pilih, $id = null)
+    public function getDetailPembelian()
     {
-        $this->pilihanPembelian = $pilih;
+        return PembelianModel::latest()->get();
+    }
 
-        if ($pilih == 'detail' && $id) {
-            $this->detailPembelian = DetailPembelianModel::where('pembelian_id', $id)->get();
-        } elseif ($pilih == 'tambah') {
-            // Reset fields for adding new entry
-            $this->selectedBarang = null;
-            $this->qty = null;
-            $this->total = null;
-        }
+    public function generateNoFaktur()
+    {
+        $lastPembelian = PembelianModel::latest()->first();
+        $lastNoFaktur = $lastPembelian ? $lastPembelian->no_faktur : 'PB000000';
+        $this->no_faktur = 'PB' . sprintf('%06d', intval(substr($lastNoFaktur, 2)) + 1);
     }
 
     public function tambahPembelian()
     {
         $this->validate([
-            'no_faktur' => 'required|unique:pembelian,no_faktur',
-            'tanggal' => 'required|date',
-            'selectedBarang' => 'required|exists:barang,id',
-            'qty' => 'required|numeric|min:1',
+            'nama_barang' => 'required',
+            'jumlah' => 'required|integer|min:1',
             'total' => 'required|numeric|min:1',
         ]);
 
-        $pembelian = new PembelianModel();
-        $pembelian->user_id = auth()->user()->id;
-        $pembelian->no_faktur = $this->no_faktur;
-        $pembelian->tanggal = $this->tanggal;
-        $pembelian->save();
+        PembelianModel::create([
+            'user_id' => Auth::id(),
+            'nama_barang' => $this->nama_barang,
+            'no_faktur' => $this->no_faktur,
+            'tanggal' => $this->tanggal,
+            'jumlah' => $this->jumlah,
+            'total' => $this->total,
+        ]);
 
-        $detailPembelian = new DetailPembelianModel();
-        $detailPembelian->pembelian_id = $pembelian->id;
-        $detailPembelian->barang_id = $this->selectedBarang;
-        $detailPembelian->qty = $this->qty;
-        $detailPembelian->total = $this->total;
-        $detailPembelian->save();
+        $this->reset(['nama_barang', 'jumlah', 'total']);
+        $this->detailPembelian = $this->getDetailPembelian();
+        session()->flash('message', 'Pembelian berhasil ditambahkan.');
+    }
 
-        $barang = BarangModel::find($this->selectedBarang);
-        $barang->stok += $this->qty;
-        $barang->save();
+    public function editPembelian($id)
+    {
+        $pembelian = PembelianModel::find($id);
+        if ($pembelian) {
+            $this->editId = $id;
+            $this->nama_barang = $pembelian->nama_barang;
+            $this->jumlah = $pembelian->jumlah;
+            $this->total = $pembelian->total;
+            $this->pilihanPembelian = 'edit';
+        }
+    }
 
-        session()->flash('message', 'Pembelian berhasil ditambahkan!');
-        $this->pembelian = PembelianModel::all();
-        $this->pilihanPembelian = 'lihat';
+    public function updatePembelian()
+    {
+        $this->validate([
+            'nama_barang' => 'required',
+            'jumlah' => 'required|integer|min:1',
+            'total' => 'required|numeric|min:1',
+        ]);
+
+        $pembelian = PembelianModel::find($this->editId);
+        if ($pembelian) {
+            $pembelian->update([
+                'nama_barang' => $this->nama_barang,
+                'jumlah' => $this->jumlah,
+                'total' => $this->total,
+            ]);
+
+            $this->reset(['nama_barang', 'jumlah', 'total', 'editId']);
+            $this->detailPembelian = $this->getDetailPembelian();
+            $this->pilihanPembelian = 'tambah';
+            session()->flash('message', 'Pembelian berhasil diperbarui.');
+        }
     }
 
     public function hapusPembelian($id)
@@ -79,14 +95,19 @@ class Pembelian extends Component
         $pembelian = PembelianModel::find($id);
         if ($pembelian) {
             $pembelian->delete();
-            session()->flash('message', 'Pembelian berhasil dihapus!');
-            $this->pembelian = PembelianModel::all();
+            $this->detailPembelian = $this->getDetailPembelian();
+            session()->flash('message', 'Pembelian berhasil dihapus.');
         }
     }
+
+    public function pilihPembelian($pilihan)
+    {
+        $this->pilihanPembelian = $pilihan;
+    }
+
     public function render()
     {
-        return view('livewire.pembelian', [
-            'pembelian' => $this->pembelian, 'barang' => $this->barang, 'detailPembelian' => $this->detailPembelian]);
+        return view('livewire.pembelian');
     }
 }
 

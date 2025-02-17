@@ -19,3 +19,4 @@ Route::get('/user', User::class)->middleware(['auth'])->name('user');
 Route::get('/barang', Barang::class)->middleware(['auth'])->name('barang');
 Route::get('/pembelian', Pembelian::class)->middleware(['auth'])->name('pembelian');
 Route::get('/penjualan', Penjualan::class)->middleware(['auth'])->name('penjualan');
+Route::post('/pembelian/simpan', [PembelianController::class, 'simpanPembelian'])->name('pembelian.simpan');

@@ -18,7 +18,14 @@
                 <div style="overflow-x: auto;">
                     <table class="table table-striped table-hover table-bordered" style="background-color: #f7f7f7; width: 70%; margin: 0 auto;">
                         <tbody>
-                            <tr>
+                        <tr>
+                                <td>
+                                    <label for="id_penjualan" class="form-label">ID Penjualan</label>
+                                </td>
+                                <td>
+                                    <input type="text" wire:model="id_penjualan" class="form-control" id="id_penjualan">
+                                </td>
+                            </tr>
                                 <td style="width: 150px;">
                                     <label for="no_faktur" class="form-label">No Faktur</label>
                                 </td>
@@ -34,13 +41,10 @@
                                     <div class="input-group">
                                         <select wire:model="nama_barang" class="form-select" id="nama_barang">
                                             <option value="">Pilih Barang</option>
-                                            @foreach ($barang ?? [] as $item)
+                                            @foreach (\App\Models\Barang::all() as $item)
                                                 <option value="{{ $item->id }}">{{ $item->nama }}</option>
                                             @endforeach
                                         </select>
-                                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#barangModal">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -70,19 +74,19 @@
                             </tr>
                             <tr>
                                 <td colspan="2">
-                                    <button type="submit" class="btn btn-primary w-100">Beli</button>
+                                    <button type="submit" class="btn btn-primary w-100" wire:click="tambahPenjualan">Jual</button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <form wire:submit.prevent="tambahPenjualan"></form>
             @endif
             @if($pilihanPenjualan == 'detail')
                 <h3 class="text-center">Detail Penjualan</h3>
                 <table class="table table-striped table-bordered table-hover" style="background-color: #f0f0f0; width: 80%; margin: 0 auto;">
                     <thead>
                         <tr>
+                            <th class="text-center">ID Penjualan</th>
                             <th class="text-center">Barang</th>
                             <th class="text-center">Qty</th>
                             <th class="text-center">Harga</th>
@@ -92,7 +96,7 @@
                     <tbody>
                         @forelse ($penjualan ?? [] as $item)
                             <tr>
-                                <td class="text-center">{{ $item->barang }}</td>
+                                <td class="text-center">{{ $item->barang->nama ?? 'Tidak Ditemukan' }}</td>
                                 <td class="text-center">{{ $item->qty }}</td>
                                 <td class="text-center">{{ number_format($item->harga, 0, ',', '.') }}</td>
                                 <td class="text-center">{{ number_format($item->subtotal, 0, ',', '.') }}</td>
@@ -107,53 +111,5 @@
             @endif
         </div>
     </div>
-
-    <div class="modal fade" id="barangModal" tabindex="-1" aria-labelledby="barangModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="barangModalLabel">Barang</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <table class="table table-striped table-bordered table-hover" style="background-color: #f7f7f7;">
-                        <thead>
-                            <tr>
-                                <th class="text-center">Nama</th>
-                                <th class="text-center">Stok</th>
-                                <th class="text-center">Harga Jual</th>
-                                <th class="text-center">Satuan</th>
-                                <th class="text-center">Keterangan</th>
-                                <th class="text-center">Gambar</th>
-                                <th class="text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($barang ?? [] as $item)
-                                <tr>
-                                    <td class="text-center">{{ $item->nama }}</td>
-                                    <td class="text-center">{{ $item->stok }}</td>
-                                    <td class="text-center">{{ number_format($item->harga_jual, 0, ',', '.') }}</td>
-                                    <td class="text-center">{{ $item->satuan }}</td>
-                                    <td class="text-center">{{ $item->keterangan }}</td>
-                                    <td class="text-center">
-                                        @if($item->gambar)
-                                            <img src="{{ asset('storage/' . $item->gambar) }}" class="rounded" width="100">
-                                        @else
-                                            <span class="text-muted">Tidak ada</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center">
-                                        <button wire:click="pilihBarang({{ $item->id }})" class="btn btn-primary">Pilih</button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 

@@ -17,5 +17,9 @@ class Penjualan extends Model
         'jumlah',
         'total',
     ];
+    public function barang()
+    {
+        return $this->belongsTo(Barang::class, 'barang_id');
+    }
 }
 

@@ -19,64 +19,73 @@
                     <table class="table table-striped table-hover table-bordered" style="background-color: #f7f7f7; width: 70%; margin: 0 auto;">
                         <tbody>
                         <tr>
-                                <td>
-                                    <label for="id_penjualan" class="form-label">ID Penjualan</label>
-                                </td>
-                                <td>
-                                    <input type="text" wire:model="id_penjualan" class="form-control" id="id_penjualan">
-                                </td>
-                            </tr>
-                                <td style="width: 150px;">
-                                    <label for="no_faktur" class="form-label">No Faktur</label>
-                                </td>
-                                <td>
-                                    <input type="text" wire:model="no_faktur" class="form-control" id="no_faktur">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label for="nama_barang" class="form-label">Nama Barang</label>
-                                </td>
-                                <td>
-                                    <div class="input-group">
-                                        <select wire:model="nama_barang" class="form-select" id="nama_barang">
-                                            <option value="">Pilih Barang</option>
-                                            @foreach (\App\Models\Barang::all() as $item)
-                                                <option value="{{ $item->id }}">{{ $item->nama }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label for="tanggal" class="form-label">Tanggal</label>
-                                </td>
-                                <td>
-                                    <input type="date" wire:model="tanggal" class="form-control" id="tanggal">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label for="jumlah" class="form-label">Jumlah</label>
-                                </td>
-                                <td>
-                                    <input type="number" wire:model="jumlah" class="form-control" id="jumlah">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label for="total" class="form-label">Total</label>
-                                </td>
-                                <td>
-                                    <input type="text" wire:model="total" class="form-control" id="total">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">
-                                    <button type="submit" class="btn btn-primary w-100" wire:click="tambahPenjualan">Jual</button>
-                                </td>
-                            </tr>
+                            <td>
+                                <label for="id_penjualan" class="form-label">ID Penjualan</label>
+                            </td>
+                            <td>
+                                <input type="text" wire:model="id_penjualan" class="form-control" id="id_penjualan">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 150px;">
+                                <label for="no_faktur" class="form-label">No Faktur</label>
+                            </td>
+                            <td>
+                                <input type="text" wire:model="no_faktur" class="form-control" id="no_faktur">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="id_penjualan" class="form-label">ID Barang</label>
+                            </td>
+                            <td>
+                                <input type="text" wire:model="id_penjualan" class="form-control" id="id_penjualan">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="nama_barang" class="form-label">Nama Barang</label>
+                            </td>
+                            <td>
+                                <div class="input-group">
+                                    <select wire:model="nama_barang" class="form-select" id="nama_barang">
+                                        <option value="">Pilih Barang</option>
+                                        @foreach (\App\Models\Barang::all() as $item)
+                                            <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="tanggal" class="form-label">Tanggal</label>
+                            </td>
+                            <td>
+                                <input type="date" wire:model="tanggal" class="form-control" id="tanggal">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="jumlah" class="form-label">Jumlah</label>
+                            </td>
+                            <td>
+                                <input type="number" wire:model="jumlah" class="form-control" id="jumlah">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="total" class="form-label">Total</label>
+                            </td>
+                            <td>
+                                <input type="text" wire:model="total" class="form-control" id="total">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <button type="submit" class="btn btn-primary w-100" wire:click="tambahPenjualan">Jual</button>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -87,6 +96,7 @@
                     <thead>
                         <tr>
                             <th class="text-center">ID Penjualan</th>
+                            <th class="text-center">ID Barang</th>
                             <th class="text-center">Barang</th>
                             <th class="text-center">Qty</th>
                             <th class="text-center">Harga</th>
@@ -96,6 +106,8 @@
                     <tbody>
                         @forelse ($penjualan ?? [] as $item)
                             <tr>
+                                <td class="text-center">{{ $item->id }}</td>
+                                <td class="text-center">{{ $item->barang->id ?? 'Tidak Ditemukan' }}</td>
                                 <td class="text-center">{{ $item->barang->nama ?? 'Tidak Ditemukan' }}</td>
                                 <td class="text-center">{{ $item->qty }}</td>
                                 <td class="text-center">{{ number_format($item->harga, 0, ',', '.') }}</td>
@@ -103,7 +115,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center">Belum ada penjualan.</td>
+                                <td colspan="6" class="text-center">Belum ada penjualan.</td>
                             </tr>
                         @endforelse
                     </tbody>

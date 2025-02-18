@@ -9,6 +9,9 @@
                 class="btn {{ $pilihanPembelian=='detail' ? 'btn-primary' : 'btn-outline-primary' }}">
                 <i class="fas fa-boxes"></i> Detail Pembelian
             </button>
+            <button wire:loading class="btn btn-info">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+            </button>
         </div>
     </div>
 

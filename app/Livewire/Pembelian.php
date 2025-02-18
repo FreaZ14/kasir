@@ -30,13 +30,14 @@ class Pembelian extends Component
     public function generateNoFaktur()
     {
         $lastPembelian = PembelianModel::latest()->first();
-        $lastNoFaktur = $lastPembelian ? $lastPembelian->no_faktur : 'PB000000';
+        $lastNoFaktur = $lastPembelian ? $lastPembelian->no_faktur : 'PB00';
         $this->no_faktur = 'PB' . sprintf('%06d', intval(substr($lastNoFaktur, 2)) + 1);
     }
 
     public function tambahPembelian()
     {
         $this->validate([
+            'id_pembelian' => 'required|exists:pembelian,id',
             'id_barang' => 'required|exists:barang,id',
             'jumlah' => 'required|integer|min:1',
             'total' => 'required|numeric|min:1',
@@ -62,6 +63,7 @@ class Pembelian extends Component
         $pembelian = PembelianModel::find($id);
         if ($pembelian) {
             $this->editId = $id;
+            $this->id_pembelian = $pembelian->id_pembelian;
             $this->id_barang = $pembelian->id_barang;
             $this->jumlah = $pembelian->jumlah;
             $this->total = $pembelian->total;
@@ -73,6 +75,7 @@ class Pembelian extends Component
     {
         $this->validate([
             'id_barang' => 'required|exists:barang,id',
+            'id_pembelian' => 'required|exists:pembelian,id',
             'jumlah' => 'required|integer|min:1',
             'total' => 'required|numeric|min:1',
         ]);
@@ -81,6 +84,7 @@ class Pembelian extends Component
         if ($pembelian) {
             $pembelian->update([
                 'id_barang' => $this->id_barang,
+                'id_pembelian' => $this->id_pembelian,
                 'jumlah' => $this->jumlah,
                 'total' => $this->total,
             ]);

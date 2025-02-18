@@ -9,22 +9,25 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('pembelian', function (Blueprint $table) {
-            $table->string('nama_barang')->default('');
-        });
+        if (Schema::hasTable('pembelian')) {
+            Schema::table('pembelian', function (Blueprint $table) {
+                $table->string('nama_barang')->after('id_barang')->nullable();
+            });
+        }
     }
-    
-    
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::table('pembelian', function (Blueprint $table) {
-            //
-        });
+        if (Schema::hasTable('pembelian')) {
+            Schema::table('pembelian', function (Blueprint $table) {
+                $table->dropColumn('nama_barang');
+            });
+        }
     }
 };
+

@@ -11,7 +11,14 @@ class Pembelian extends Model
     protected $table = 'pembelian';
 
     protected $fillable = [
-        'user_id','id_barang', 'id_pembelian', 'nama_barang', 'no_faktur', 'tanggal', 'jumlah', 'total'
+        'user_id',
+        'id_barang',
+        'id_pembelian', 
+        'nama_barang', 
+        'no_faktur', 
+        'tanggal', 
+        'jumlah', 
+        'total'
     ];
 }
 

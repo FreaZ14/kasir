@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Barang;
 use App\Models\Penjualan as PenjualanModel;
 use Livewire\Component;
+use Illuminate\Support\Facades\DB;
 
 class Penjualan extends Component
 {
@@ -18,6 +19,15 @@ class Penjualan extends Component
     public $jumlah;
     public $total;
     public $id_penjualan;
+
+    protected $rules = [
+        'id_penjualan' => 'required',
+        'barang_id' => 'required',
+        'no_faktur' => 'required',
+        'tanggal' => 'required',
+        'jumlah' => 'required|numeric',
+        'total' => 'required|numeric',
+    ];
 
     public function mount()
     {
@@ -63,17 +73,25 @@ class Penjualan extends Component
 
     public function tambahPenjualan()
     {
-        // dd('ok');
-        PenjualanModel::create([
-            'id_penjualan' => $this->id_penjualan,
-            'barang_id' => $this->barang_id,
-            'no_faktur' => $this->no_faktur,
-            'tanggal' => $this->tanggal,
-            'jumlah' => $this->jumlah,
-            'total' => $this->total
-            
-        ]);
-
+        $this->validate();
+    
+        DB::beginTransaction();
+        try {
+            $penjualan = new PenjualanModel();
+            $penjualan->id_penjualan = $this->id_penjualan;
+            $penjualan->barang_id = $this->barang_id;
+            $penjualan->no_faktur = $this->no_faktur; 
+            $penjualan->tanggal = $this->tanggal;
+            $penjualan->jumlah = $this->jumlah;
+            $penjualan->total = $this->total;
+            $penjualan->save();
+    
+            DB::commit();
+            session()->flash('success', 'Penjualan berhasil disimpan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
     public function simpan()
     {
@@ -81,7 +99,7 @@ class Penjualan extends Component
     
         DB::beginTransaction();
         try {
-            $penjualan = new Penjualan();
+            $penjualan = new PenjualanModel();
             $penjualan->id_penjualan = $this->id_penjualan;
             $penjualan->barang_id = $this->barang_id;
             $penjualan->no_faktur = $this->no_faktur; 

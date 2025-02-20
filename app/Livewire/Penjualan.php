@@ -2,50 +2,118 @@
 
 namespace App\Livewire;
 
-use App\Models\Barang;
-use App\Models\Penjualan as PenjualanModel;
 use Livewire\Component;
+use App\Models\Penjualan as PenjualanModel;
+use App\Models\Barang as BarangModel;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class Penjualan extends Component
 {
-    public $pilihanPenjualan;
+    public $id_penjualan, $id_barang, $jumlah, $total;
+    public $detailPenjualan = [];
+    public $pilihanPenjualan = 'tambah';
     public $no_faktur;
     public $tanggal;
-    public $penjualan = [];
-    public $searchBarang;
-    public $listBarang = [];
-    public $barang_id;
-    public $jumlah;
-    public $total;
-    public $id_penjualan;
-
-    protected $rules = [
-        'id_penjualan' => 'required',
-        'barang_id' => 'required',
-        'no_faktur' => 'required',
-        'tanggal' => 'required',
-        'jumlah' => 'required|numeric',
-        'total' => 'required|numeric',
-    ];
+    public $editId;
 
     public function mount()
     {
-        $this->pilihanPenjualan = 'form';
-        $this->tanggal = (new \DateTime())->format('Y-m-d');
+        $this->detailPenjualan = $this->getDetailPenjualan();
         $this->generateNoFaktur();
+        $this->tanggal = now()->format('Y-m-d');
     }
 
-    public function render()
+    public function getDetailPenjualan()
     {
-        return view('livewire.penjualan', [
-            'pilihanPenjualan' => $this->pilihanPenjualan,
-            'no_faktur' => $this->no_faktur,
-            'tanggal' => $this->tanggal,
-            'penjualan' => $this->penjualan,
-            'searchBarang' => $this->searchBarang,
-            'listBarang' => $this->listBarang,
+        return PenjualanModel::with('barang')->latest()->get();
+    }
+
+    public function generateNoFaktur()
+    {
+        $lastPenjualan = PenjualanModel::latest()->first();
+        $lastNoFaktur = $lastPenjualan ? $lastPenjualan->no_faktur : 'PJ00';
+        $this->no_faktur = 'PJ' . sprintf('%06d', intval(substr($lastNoFaktur, 2)) + 1);
+    }
+
+    public function tambahPenjualan()
+    {
+        $this->validate([
+            'id_barang' => 'required',
+            'no_faktur' => 'required',
+            'tanggal' => 'required|date',
+            'jumlah' => 'required|integer|min:1',
+            'total' => 'required|numeric|min:0',
         ]);
+        
+        DB::transaction(function () {
+            $penjualan = PenjualanModel::create([
+                'user_id' => Auth::id(),
+                'id_barang' => $this->id_barang,
+                'no_faktur' => $this->no_faktur,
+                'tanggal' => $this->tanggal,
+                'jumlah' => $this->jumlah,
+                'total' => $this->total,
+            ]);
+
+            $barang = BarangModel::find($this->id_barang);
+            $barang->stok -= $this->jumlah;
+            $barang->save();
+        });
+
+        $this->reset(['id_barang', 'jumlah', 'total', 'editId']);
+        $this->pilihanPenjualan = 'tambah';
+        session()->flash('message', 'Penjualan berhasil ditambahkan.');
+        $this->detailPenjualan = $this->getDetailPenjualan();
+    }
+
+    public function editPenjualan($id)
+    {
+        $penjualan = PenjualanModel::find($id);
+        if ($penjualan) {
+            $this->editId = $id;
+            $this->id_barang = $penjualan->id_barang;
+            $this->jumlah = $penjualan->jumlah;
+            $this->total = $penjualan->total;
+            $this->pilihanPenjualan = 'edit';
+        }
+    }
+
+    public function updatePenjualan()
+    {
+        $this->validate([
+            'id_barang' => 'required|exists:barang,id',
+            'jumlah' => 'required|integer|min:1',
+            'total' => 'required|numeric|min:1',
+        ]);
+
+        $penjualan = PenjualanModel::find($this->editId);
+        if ($penjualan) {
+            $penjualan->update([
+                'id_barang' => $this->id_barang,
+                'jumlah' => $this->jumlah,
+                'total' => $this->total,
+            ]);
+
+            $barang = BarangModel::find($this->id_barang);
+            $barang->stok -= $penjualan->jumlah - $this->jumlah;
+            $barang->save();
+
+            $this->reset(['id_barang', 'jumlah', 'total', 'editId']);
+            $this->detailPenjualan = $this->getDetailPenjualan();
+            $this->pilihanPenjualan = 'tambah';
+            session()->flash('message', 'Penjualan berhasil diperbarui.');
+        }
+    }
+
+    public function hapusPenjualan($id)
+    {
+        $penjualan = PenjualanModel::find($id);
+        if ($penjualan) {
+            $penjualan->delete();
+            $this->detailPenjualan = $this->getDetailPenjualan();
+            session()->flash('message', 'Penjualan berhasil dihapus.');
+        }
     }
 
     public function pilihPenjualan($pilihan)
@@ -53,67 +121,16 @@ class Penjualan extends Component
         $this->pilihanPenjualan = $pilihan;
     }
 
-    public function pilihBarang($id)
+    public function render()
     {
-        $barang = Barang::findOrFail($id);
-        $this->barang_id = $barang->id;
-        $this->jumlah = 1;
-    }
-
-    private function generateNoFaktur()
-    {
-        $now = new \DateTime();
-        $this->no_faktur = 'F' . $now->format('ymd') . '-' . str_pad($now->format('His'), 6, '0', STR_PAD_LEFT);
-    }
-
-    public function updatedSearchBarang()
-    {
-        $this->listBarang = Barang::where('nama_barang', 'LIKE', '%' . $this->searchBarang . '%')->get();
-    }
-
-    public function tambahPenjualan()
-    {
-        $this->validate();
-    
-        DB::beginTransaction();
-        try {
-            $penjualan = new PenjualanModel();
-            $penjualan->id_penjualan = $this->id_penjualan;
-            $penjualan->barang_id = $this->barang_id;
-            $penjualan->no_faktur = $this->no_faktur; 
-            $penjualan->tanggal = $this->tanggal;
-            $penjualan->jumlah = $this->jumlah;
-            $penjualan->total = $this->total;
-            $penjualan->save();
-    
-            DB::commit();
-            session()->flash('success', 'Penjualan berhasil disimpan.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
-    }
-    public function simpan()
-    {
-        $this->validate();
-    
-        DB::beginTransaction();
-        try {
-            $penjualan = new PenjualanModel();
-            $penjualan->id_penjualan = $this->id_penjualan;
-            $penjualan->barang_id = $this->barang_id;
-            $penjualan->no_faktur = $this->no_faktur; 
-            $penjualan->tanggal = $this->tanggal;
-            $penjualan->jumlah = $this->jumlah;
-            $penjualan->total = $this->total;
-            $penjualan->save();
-    
-            DB::commit();
-            session()->flash('success', 'Penjualan berhasil disimpan.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
+        $listBarang = BarangModel::all();
+        return view('livewire.penjualan', [
+            'listBarang' => $listBarang,
+            'no_faktur' => $this->no_faktur,
+            'tanggal' => $this->tanggal,
+            'pilihanPenjualan' => $this->pilihanPenjualan,
+            'detailPenjualan' => $this->detailPenjualan,
+        ]);
     }
 }
 

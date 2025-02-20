@@ -4,17 +4,17 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePenjualanTable extends Migration
-{
+return new class extends Migration {
     public function up()
     {
         Schema::create('penjualan', function (Blueprint $table) {
-            $table->id('id_penjualan');
-            $table->string('barang');
-            $table->string('no_faktur');
+            $table->id(); 
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('id_barang')->constrained('barang')->onDelete('cascade');
+            $table->string('no_faktur')->unique();
             $table->date('tanggal');
-            $table->integer('jumlah');
-            $table->integer('total');
+            $table->integer('jumlah')->nullable();
+            $table->decimal('total', 10, 2)->nullable();
             $table->timestamps();
         });
     }
@@ -23,4 +23,5 @@ class CreatePenjualanTable extends Migration
     {
         Schema::dropIfExists('penjualan');
     }
-}
+};
+

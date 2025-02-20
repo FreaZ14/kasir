@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Barang;
 
 class Penjualan extends Model
 {
@@ -12,6 +13,8 @@ class Penjualan extends Model
     protected $table = 'penjualan';
     protected $fillable = [
         'barang_id',
+        'user_id',
+        'id_penjualan',
         'nama_barang',
         'no_faktur',
         'tanggal',

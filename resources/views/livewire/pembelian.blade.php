@@ -28,7 +28,7 @@
                                 <th>No Faktur</th>
                                 <th>Tanggal</th>
                                 <th>Jumlah</th>
-                                <th>Total</th>
+                                <th>Total Harga</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -98,7 +98,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th>Total</th>
+                                <th>Total Harga</th>
                                 <td>
                                     <input type="text" wire:model="total" class="form-control">
                                 </td>

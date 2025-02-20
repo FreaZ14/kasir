@@ -95,7 +95,8 @@ class Pembelian extends Component
             ]);
 
             $barang = BarangModel::find($this->id_barang);
-            $barang->stok += $this->jumlah;
+            $stokLama = $barang->stok;
+            $barang->stok += $this->jumlah - $pembelian->jumlah;
             $barang->save();
 
             $this->reset(['id_barang', 'jumlah', 'total', 'editId']);
@@ -109,6 +110,10 @@ class Pembelian extends Component
     {
         $pembelian = PembelianModel::find($id);
         if ($pembelian) {
+            $barang = BarangModel::find($pembelian->id_barang);
+            $barang->stok -= $pembelian->jumlah;
+            $barang->save();
+
             $pembelian->delete();
             $this->detailPembelian = $this->getDetailPembelian();
             session()->flash('message', 'Pembelian berhasil dihapus.');
@@ -132,3 +137,4 @@ class Pembelian extends Component
         ]);
     }
 }
+

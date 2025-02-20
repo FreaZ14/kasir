@@ -11,7 +11,6 @@ class Penjualan extends Model
 
     protected $table = 'penjualan';
     protected $fillable = [
-        'id_penjualan',
         'barang_id',
         'nama_barang',
         'no_faktur',
@@ -19,6 +18,7 @@ class Penjualan extends Model
         'jumlah',
         'total',
     ];
+
     public function barang()
     {
         return $this->belongsTo(Barang::class, 'barang_id');

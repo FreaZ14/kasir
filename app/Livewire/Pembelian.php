@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Pembelian as PembelianModel;
 use App\Models\Barang as BarangModel;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class Pembelian extends Component
 {
@@ -24,7 +26,7 @@ class Pembelian extends Component
 
     public function getDetailPembelian()
     {
-        return PembelianModel::latest()->get();
+        return PembelianModel::with('barang')->latest()->get();
     }
 
     public function generateNoFaktur()
@@ -37,25 +39,31 @@ class Pembelian extends Component
     public function tambahPembelian()
     {
         $this->validate([
-            'id_pembelian' => 'required|exists:pembelian,id',
             'id_barang' => 'required|exists:barang,id',
             'jumlah' => 'required|integer|min:1',
             'total' => 'required|numeric|min:1',
+            'tanggal' => 'required|date',    
         ]);
+        
+        DB::transaction(function () {
+            $pembelian = PembelianModel::create([
+                'user_id' => Auth::id(),
+                'id_barang' => $this->id_barang,
+                'no_faktur' => $this->no_faktur,
+                'tanggal' => $this->tanggal,
+                'jumlah' => $this->jumlah,
+                'total' => $this->total,
+            ]);
 
-        PembelianModel::create([
-            'user_id' => Auth::id(),
-            'id_pembelian' => $this->id_pembelian,
-            'id_barang' => $this->id_barang,
-            'no_faktur' => $this->no_faktur,
-            'tanggal' => $this->tanggal,
-            'jumlah' => $this->jumlah,
-            'total' => $this->total,
-        ]);
+            $barang = BarangModel::find($this->id_barang);
+            $barang->stok += $this->jumlah;
+            $barang->save();
+        });
 
-        $this->reset(['id_pembelian', 'id_barang', 'jumlah', 'total']);
-        $this->detailPembelian = $this->getDetailPembelian();
+        $this->reset(['id_barang', 'jumlah', 'total', 'editId']);
+        $this->pilihanPembelian = 'tambah';
         session()->flash('message', 'Pembelian berhasil ditambahkan.');
+        $this->detailPembelian = $this->getDetailPembelian();
     }
 
     public function editPembelian($id)
@@ -63,7 +71,6 @@ class Pembelian extends Component
         $pembelian = PembelianModel::find($id);
         if ($pembelian) {
             $this->editId = $id;
-            $this->id_pembelian = $pembelian->id_pembelian;
             $this->id_barang = $pembelian->id_barang;
             $this->jumlah = $pembelian->jumlah;
             $this->total = $pembelian->total;
@@ -75,7 +82,6 @@ class Pembelian extends Component
     {
         $this->validate([
             'id_barang' => 'required|exists:barang,id',
-            'id_pembelian' => 'required|exists:pembelian,id',
             'jumlah' => 'required|integer|min:1',
             'total' => 'required|numeric|min:1',
         ]);
@@ -84,12 +90,15 @@ class Pembelian extends Component
         if ($pembelian) {
             $pembelian->update([
                 'id_barang' => $this->id_barang,
-                'id_pembelian' => $this->id_pembelian,
                 'jumlah' => $this->jumlah,
                 'total' => $this->total,
             ]);
 
-            $this->reset(['id_pembelian', 'id_barang', 'jumlah', 'total', 'editId']);
+            $barang = BarangModel::find($this->id_barang);
+            $barang->stok += $this->jumlah;
+            $barang->save();
+
+            $this->reset(['id_barang', 'jumlah', 'total', 'editId']);
             $this->detailPembelian = $this->getDetailPembelian();
             $this->pilihanPembelian = 'tambah';
             session()->flash('message', 'Pembelian berhasil diperbarui.');
@@ -112,15 +121,14 @@ class Pembelian extends Component
     }
 
     public function render()
-{
-    $listBarang = BarangModel::all();
-    $no_faktur = $this->no_faktur; 
-    $tanggal = $this->tanggal;
-    $pilihanPembelian = $this->pilihanPembelian;
-    return view('livewire.pembelian', compact('listBarang', 'no_faktur', 'tanggal', 'pilihanPembelian'));
+    {
+        $listBarang = BarangModel::all();
+        return view('livewire.pembelian', [
+            'listBarang' => $listBarang,
+            'no_faktur' => $this->no_faktur,
+            'tanggal' => $this->tanggal,
+            'pilihanPembelian' => $this->pilihanPembelian,
+            'detailPembelian' => $this->detailPembelian,
+        ]);
+    }
 }
-}
-
-
-
-

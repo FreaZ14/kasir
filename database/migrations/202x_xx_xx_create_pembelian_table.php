@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up()
     {
         Schema::create('pembelian', function (Blueprint $table) {
-            $table->id('id_pembelian');
+            $table->id(); 
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('id_barang')->constrained('barang')->onDelete('cascade');
             $table->string('no_faktur')->unique();

@@ -3,6 +3,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Barang;
 
 class Pembelian extends Model
 {
@@ -20,5 +21,10 @@ class Pembelian extends Model
         'jumlah', 
         'total'
     ];
+    public function barang()
+    {
+        return $this->belongsTo(Barang::class, 'id_barang');
+    }
+
 }
 

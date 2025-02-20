@@ -48,7 +48,6 @@ class Barang extends Component
 
     public function tambahBarang()
     {
-        // Simpan gambar ke storage
         $gambarPath = $this->gambar ? $this->gambar->store('barang', 'public') : null;
 
         BarangModel::create([
@@ -70,10 +69,8 @@ class Barang extends Component
     {
         $barang = BarangModel::find($this->barangId);
         if ($barang) {
-            // Jika ada gambar baru, simpan ke storage
             $gambarPath = $this->gambar ? $this->gambar->store('barang', 'public') : $this->gambarLama;
 
-            // Jika ada gambar lama dan diganti, hapus dari storage
             if ($this->gambar && $this->gambarLama) {
                 Storage::delete('public/' . $this->gambarLama);
             }

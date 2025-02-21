@@ -5,6 +5,9 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Barang as BarangModel;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Barang as BarangExport;
 
 class Barang extends Component
 {
@@ -95,7 +98,6 @@ class Barang extends Component
     {
         $barang = BarangModel::find($id);
         if ($barang) {
-            // Hapus gambar dari storage jika ada
             if ($barang->gambar) {
                 Storage::delete('public/' . $barang->gambar);
             }
@@ -104,6 +106,19 @@ class Barang extends Component
 
         session()->flash('message', 'Barang berhasil dihapus!');
         $this->barang = BarangModel::all();
+    }
+
+    public function exportToPdf()
+    {
+        $barang = BarangModel::all();
+
+        $pdf = Pdf::loadView('livewire.barang-pdf', compact('barang'));
+        return $pdf->download('barang.pdf');
+    }
+
+    public function exportToExcel()
+    {
+        return Excel::download(new BarangExport, 'barang.xlsx');
     }
 
     public function resetInputFields()

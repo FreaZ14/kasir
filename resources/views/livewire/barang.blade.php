@@ -10,6 +10,12 @@
                     class="btn {{ $pilihanBarang=='tambah' ? 'btn-primary' : 'btn-outline-primary' }}">
                     <i class="fas fa-plus"></i> Tambah Barang
                 </button>
+                <button wire:click="exportToPdf" class="btn btn-danger">
+                    <i class="fas fa-file-pdf"></i> Export PDF
+                </button>
+                <button wire:click="exportToExcel" class="btn btn-success">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
                 <button wire:loading class="btn btn-info">
                     <i class="fas fa-spinner fa-spin"></i> Loading...
                 </button>
@@ -115,3 +121,4 @@
         @endif
     </div>
 </div>
+

@@ -38,12 +38,13 @@ class Penjualan extends Component
 
     public function tambahPenjualan()
     {
+        //dd($this->id_barang);
         $this->validate([
-            'id_barang' => 'required',
+            'id_barang' => 'required|exists:barang,id',
             'no_faktur' => 'required',
-            'tanggal' => 'required|date',
             'jumlah' => 'required|integer|min:1',
-            'total' => 'required|numeric|min:0',
+            'total' => 'required|numeric|min:1',
+            'tanggal' => 'required|date',    
         ]);
         
         DB::transaction(function () {
@@ -89,6 +90,7 @@ class Penjualan extends Component
 
         $penjualan = PenjualanModel::find($this->editId);
         if ($penjualan) {
+            $originalJumlah = $penjualan->jumlah;
             $penjualan->update([
                 'id_barang' => $this->id_barang,
                 'jumlah' => $this->jumlah,
@@ -96,7 +98,7 @@ class Penjualan extends Component
             ]);
 
             $barang = BarangModel::find($this->id_barang);
-            $barang->stok -= $penjualan->jumlah - $this->jumlah;
+            $barang->stok -= $this->jumlah - $originalJumlah;
             $barang->save();
 
             $this->reset(['id_barang', 'jumlah', 'total', 'editId']);
@@ -110,6 +112,10 @@ class Penjualan extends Component
     {
         $penjualan = PenjualanModel::find($id);
         if ($penjualan) {
+            $barang = BarangModel::find($penjualan->id_barang);
+            $barang->stok += $penjualan->jumlah;
+            $barang->save();
+
             $penjualan->delete();
             $this->detailPenjualan = $this->getDetailPenjualan();
             session()->flash('message', 'Penjualan berhasil dihapus.');

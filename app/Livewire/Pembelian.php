@@ -88,6 +88,7 @@ class Pembelian extends Component
 
         $pembelian = PembelianModel::find($this->editId);
         if ($pembelian) {
+            $originalJumlah = $pembelian->jumlah;
             $pembelian->update([
                 'id_barang' => $this->id_barang,
                 'jumlah' => $this->jumlah,
@@ -95,8 +96,7 @@ class Pembelian extends Component
             ]);
 
             $barang = BarangModel::find($this->id_barang);
-            $stokLama = $barang->stok;
-            $barang->stok += $this->jumlah - $pembelian->jumlah;
+            $barang->stok += $this->jumlah - $originalJumlah;
             $barang->save();
 
             $this->reset(['id_barang', 'jumlah', 'total', 'editId']);

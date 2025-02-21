@@ -13,8 +13,8 @@ return new class extends Migration {
             $table->foreignId('id_barang')->constrained('barang')->onDelete('cascade');
             $table->string('no_faktur')->unique();
             $table->date('tanggal');
-            $table->integer('jumlah')->nullable();
-            $table->decimal('total', 10, 2)->nullable();
+            $table->integer('jumlah');
+            $table->decimal('total', 10, 2);
             $table->timestamps();
         });
     }
@@ -24,4 +24,3 @@ return new class extends Migration {
         Schema::dropIfExists('penjualan');
     }
 };
-

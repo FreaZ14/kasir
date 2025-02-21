@@ -19,6 +19,11 @@
 
     <!-- Latest compiled JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background-color: #eef4f6;
+        }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -106,5 +111,4 @@
     </div>
 </body>
 </html>
-
 

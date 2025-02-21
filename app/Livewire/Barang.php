@@ -123,3 +123,4 @@ class Barang extends Component
         return view('livewire.barang');
     }
 }
+

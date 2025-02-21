@@ -85,23 +85,22 @@
             <div class="container">
                 <div class="row">
                     <div class="col-12">
-                        <ul class="nav nav-tabs">
+                        <ul class="nav nav-tabs" style="border-bottom: 2px solid #3498db;">
                             <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Beranda</a>
+                                <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" style="{{ request()->routeIs('home') ? 'background-color: #3498db; color: white;' : 'background-color: #e6f2ff; color: #3498db;' }}" href="{{ route('home') }}">Beranda</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('user') ? 'active' : '' }}" href="{{ route('user') }}">Pengguna</a>
+                                <a class="nav-link {{ request()->routeIs('user') ? 'active' : '' }}" style="{{ request()->routeIs('user') ? 'background-color: #2ecc71; color: white;' : 'background-color: #e6f8f7; color: #2ecc71;' }}" href="{{ route('user') }}">Pengguna</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('barang') ? 'active' : '' }}" href="{{ route('barang') }}">Barang</a>
+                                <a class="nav-link {{ request()->routeIs('barang') ? 'active' : '' }}" style="{{ request()->routeIs('barang') ? 'background-color: #e74c3c; color: white;' : 'background-color: #ffe6e6; color: #e74c3c;' }}" href="{{ route('barang') }}">Barang</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('pembelian') ? 'active' : '' }}" href="{{ route('pembelian') }}">Pembelian</a>
+                                <a class="nav-link {{ request()->routeIs('pembelian') ? 'active' : '' }}" style="{{ request()->routeIs('pembelian') ? 'background-color: #2ecc71; color: white;' : 'background-color: #e6f2ff; color: #2ecc71;' }}" href="{{ route('pembelian') }}">Pembelian</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('penjualan') ? 'active' : '' }}" href="{{ route('penjualan') }}">Penjualan</a>
+                                <a class="nav-link {{ request()->routeIs('penjualan') ? 'active' : '' }}" style="{{ request()->routeIs('penjualan') ? 'background-color:  #3498db; color: white;' : 'background-color: #e6f8f7; color: #3498db;' }}" href="{{ route('penjualan') }}">Penjualan</a>
                             </li>
-                        
                         </ul>
                     </div>
                 </div>

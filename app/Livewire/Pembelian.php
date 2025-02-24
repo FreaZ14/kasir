@@ -10,23 +10,18 @@ use Illuminate\Support\Facades\DB;
 
 class Pembelian extends Component
 {
-    public $id_pembelian, $id_barang, $jumlah, $total;
-    public $detailPembelian = [];
+    public $id_barang, $jumlah, $total;
     public $pilihanPembelian = 'tambah';
     public $no_faktur;
     public $tanggal;
-    public $editId;
+    public $produkDitambahkan = [];
+    public $dibayar = 0;
+    public $kembalian = 0;
 
     public function mount()
     {
-        $this->detailPembelian = $this->getDetailPembelian();
         $this->generateNoFaktur();
         $this->tanggal = now()->format('Y-m-d');
-    }
-
-    public function getDetailPembelian()
-    {
-        return PembelianModel::with('barang')->latest()->get();
     }
 
     public function generateNoFaktur()
@@ -36,93 +31,57 @@ class Pembelian extends Component
         $this->no_faktur = 'PB' . sprintf('%06d', intval(substr($lastNoFaktur, 2)) + 1);
     }
 
-    public function tambahPembelian()
+    public function tambahProduk()
     {
         $this->validate([
             'id_barang' => 'required|exists:barang,id',
             'jumlah' => 'required|integer|min:1',
-            'total' => 'required|numeric|min:1',
-            'tanggal' => 'required|date',    
         ]);
-        
-        DB::transaction(function () {
-            $pembelian = PembelianModel::create([
-                'user_id' => Auth::id(),
-                'id_barang' => $this->id_barang,
-                'no_faktur' => $this->no_faktur,
-                'tanggal' => $this->tanggal,
-                'jumlah' => $this->jumlah,
-                'total' => $this->total,
-            ]);
 
-            $barang = BarangModel::find($this->id_barang);
-            $barang->stok += $this->jumlah;
-            $barang->save();
+        $barang = BarangModel::find($this->id_barang);
+        if (!$barang) return;    
+        
+        $harga = (int) $barang->harga;
+        $total = $harga * (int) $this->jumlah;
+
+        $this->produkDitambahkan[] = [
+            'id' => $barang->id,
+            'nama' => $barang->nama,
+            'jumlah' => $this->jumlah,
+            'harga' => $barang->harga,
+            'total_harga' => $barang->harga * $this->jumlah, 
+        ];
+
+        $this->reset(['id_barang', 'jumlah']);
+    }
+
+    public function prosesPembelian()
+    {
+        if (empty($this->produkDitambahkan)) {
+            session()->flash('message', 'Tambahkan produk terlebih dahulu.');
+            return;
+        }
+
+        DB::transaction(function () {
+            foreach ($this->produkDitambahkan as $produk) {
+                PembelianModel::create([
+                    'user_id' => Auth::id(),
+                    'id_barang' => $produk['id_barang'],
+                    'no_faktur' => $this->no_faktur,
+                    'tanggal' => $this->tanggal,
+                    'jumlah' => $produk['jumlah'],
+                    'total' => $produk['total'],
+                ]);
+
+                $barang = BarangModel::find($produk['id_barang']);
+                $barang->stok += $produk['jumlah'];
+                $barang->save();
+            }
         });
 
-        $this->reset(['id_barang', 'jumlah', 'total', 'editId']);
-        $this->pilihanPembelian = 'tambah';
-        session()->flash('message', 'Pembelian berhasil ditambahkan.');
-        $this->detailPembelian = $this->getDetailPembelian();
-    }
-
-    public function editPembelian($id)
-    {
-        $pembelian = PembelianModel::find($id);
-        if ($pembelian) {
-            $this->editId = $id;
-            $this->id_barang = $pembelian->id_barang;
-            $this->jumlah = $pembelian->jumlah;
-            $this->total = $pembelian->total;
-            $this->pilihanPembelian = 'edit';
-        }
-    }
-
-    public function updatePembelian()
-    {
-        $this->validate([
-            'id_barang' => 'required|exists:barang,id',
-            'jumlah' => 'required|integer|min:1',
-            'total' => 'required|numeric|min:1',
-        ]);
-
-        $pembelian = PembelianModel::find($this->editId);
-        if ($pembelian) {
-            $originalJumlah = $pembelian->jumlah;
-            $pembelian->update([
-                'id_barang' => $this->id_barang,
-                'jumlah' => $this->jumlah,
-                'total' => $this->total,
-            ]);
-
-            $barang = BarangModel::find($this->id_barang);
-            $barang->stok += $this->jumlah - $originalJumlah;
-            $barang->save();
-
-            $this->reset(['id_barang', 'jumlah', 'total', 'editId']);
-            $this->detailPembelian = $this->getDetailPembelian();
-            $this->pilihanPembelian = 'tambah';
-            session()->flash('message', 'Pembelian berhasil diperbarui.');
-        }
-    }
-
-    public function hapusPembelian($id)
-    {
-        $pembelian = PembelianModel::find($id);
-        if ($pembelian) {
-            $barang = BarangModel::find($pembelian->id_barang);
-            $barang->stok -= $pembelian->jumlah;
-            $barang->save();
-
-            $pembelian->delete();
-            $this->detailPembelian = $this->getDetailPembelian();
-            session()->flash('message', 'Pembelian berhasil dihapus.');
-        }
-    }
-
-    public function pilihPembelian($pilihan)
-    {
-        $this->pilihanPembelian = $pilihan;
+        $this->reset(['produkDitambahkan']);
+        $this->generateNoFaktur();
+        session()->flash('message', 'Pembelian berhasil diproses.');
     }
 
     public function render()
@@ -132,9 +91,25 @@ class Pembelian extends Component
             'listBarang' => $listBarang,
             'no_faktur' => $this->no_faktur,
             'tanggal' => $this->tanggal,
-            'pilihanPembelian' => $this->pilihanPembelian,
-            'detailPembelian' => $this->detailPembelian,
+            'produkDitambahkan' => $this->produkDitambahkan,
+            'barangList' => BarangModel::all(),
+            'dibayar' => $this->dibayar,
         ]);
     }
-}
+        public function hapusProduk($index)
+    {
+        unset($this->produkDitambahkan[$index]);
+        $this->produkDitambahkan = array_values($this->produkDitambahkan);
+    }
+    public function hitungTotal()
+    {
+        $this->total = collect($this->produkDitambahkan)->sum('total_harga');
+    }
 
+    public function hitungKembalian()
+    {
+        $this->kembalian = max(0, $this->dibayar - $this->total);
+    }
+
+    
+}

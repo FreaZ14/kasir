@@ -9,111 +9,104 @@
                 class="btn {{ $pilihanPembelian=='detail' ? 'btn-primary' : 'btn-outline-primary' }}">
                 <i class="fas fa-boxes"></i> Detail Pembelian
             </button>
-            <button wire:loading class="btn btn-info">
-                <i class="fas fa-spinner fa-spin"></i> Loading...
-            </button>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-12">
-            @if($pilihanPembelian=='detail')
-                <div wire:poll>
-                    <table class="table table-hover table-bordered text-center">
-                        <thead class="table-secondary">
-                            <tr>
-                                <th>ID Pembelian</th>
-                                <th>ID Barang</th>
-                                <th>Nama Barang</th>
-                                <th>No Faktur</th>
-                                <th>Tanggal</th>
-                                <th>Jumlah</th>
-                                <th>Total Harga</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($detailPembelian as $detail)
-                                <tr>
-                                    <td>{{ $detail->id }}</td> 
-                                    <td>{{ $detail->id_barang }}</td>
-                                    <td>{{ $detail->barang->nama ?? '-' }}</td> 
-                                    <td>{{ $detail->no_faktur }}</td>
-                                    <td>{{ $detail->tanggal }}</td>
-                                    <td>{{ $detail->jumlah }}</td>
-                                    <td>{{ number_format($detail->total, 0, ',', '.') }}</td>
-                                    <td>
-                                        <button wire:click="editPembelian({{ $detail->id }})" class="btn btn-warning btn-sm">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </button>
-                                        <button wire:click="hapusPembelian({{ $detail->id }})" class="btn btn-danger btn-sm">
-                                            <i class="fas fa-trash"></i> Hapus
-                                        </button>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="8">Belum ada pembelian.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            @endif
+        <div class="col-md-6">
+            <h5><strong>Informasi Pembelian</strong></h5>
+            <table class="table table-bordered">
+                <tr><th>No Faktur</th><td>{{ $no_faktur }}</td></tr>
+                <tr><th>Tanggal</th><td>{{ $tanggal }}</td></tr>
+            </table>
         </div>
+        <div class="col-md-6">
+            <h5><strong>Daftar Produk</strong></h5>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Harga</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($listBarang as $barang)
+                        <tr>
+                            <td>{{ $barang->nama }}</td>
+                            <td>Rp {{ number_format($barang->harga_jual, 0, ',', '.') }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-        @if($pilihanPembelian=='tambah' || $pilihanPembelian=='edit')
-            <div class="col-md-12">
-                <h4 class="text-center mt-3">Form Pembelian</h4>
-                <form wire:submit.prevent="{{ $pilihanPembelian == 'tambah' ? 'tambahPembelian' : 'updatePembelian' }}">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr>
-                                <th>Nama Barang</th>
-                                <td>
-                                    <select wire:model="id_barang" class="form-select">
-                                        <option value="">Pilih Barang</option>
-                                        @foreach ($listBarang as $barang)
-                                            <option value="{{ $barang->id }}">{{ $barang->nama }}</option>
-                                        @endforeach
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>No Faktur</th>
-                                <td>
-                                    <input type="text" wire:model="no_faktur" class="form-control" readonly>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Tanggal</th>
-                                <td>
-                                    <input type="date" wire:model="tanggal" class="form-control">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Jumlah</th>
-                                <td>
-                                    <input type="number" wire:model="jumlah" class="form-control">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Total Harga</th>
-                                <td>
-                                    <input type="text" wire:model="total" class="form-control">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        {{ $pilihanPembelian == 'tambah' ? 'Beli' : 'Simpan' }}
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
+    <div class="row">
+        <div class="col-md-5">
+            <h5><strong>Tambah Produk</strong></h5>
+            <div class="d-flex gap-2">
+                <select wire:model="id_barang" class="form-select">
+                    <option value="">-- Pilih Produk --</option>
+                    @foreach ($listBarang as $barang)
+                        <option value="{{ $barang->id }}">{{ $barang->nama }}</option>
+                    @endforeach
+                </select>
+                <input type="number" wire:model="jumlah" class="form-control" placeholder="Qty">
+                <button wire:click="tambahProduk" class="btn btn-success">+</button>
             </div>
-        @endif
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-5">
+            <h5><strong>Produk yang Ditambahkan</strong></h5>
+            <table class="table table-bordered text-center">
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Qty</th>
+                        <th>Harga</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($produkDitambahkan as $produk)
+                    @php
+                        $barang = App\Models\Barang::find($produk['id']);
+                    @endphp
+                    <tr>
+                        <td>{{ $produk['nama'] ?? 'Tanpa Nama' }}</td>
+                        <td>{{ $produk['jumlah'] ?? 0 }}</td>
+                        <td>Rp {{ number_format($barang->harga_jual * $produk['jumlah'], 0, ',', '.') }}</td>
+                        <td>
+                            <button wire:click="hapusProduk({{ $loop->index }})" class="btn btn-danger btn-sm">Hapus</button>
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <button wire:click="hitungTotal" class="btn btn-primary">Lanjut</button>
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <h5><strong>Total Pembelian</strong></h5>
+            <table class="table table-bordered">
+                <tr>
+                    <td>Total</td>
+                    <td><input type="text" wire:model="total" class="form-control" readonly></td>
+                </tr>
+                <tr>
+                    <td>Dibayar</td>
+                    <td><input type="number" wire:model="dibayar" wire:keyup="hitungKembalian" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>Kembalian</td>
+                    <td><input type="text" wire:model="kembalian" class="form-control" readonly></td>
+                </tr>
+            </table>
+            <button wire:click="prosesPembelian" class="btn btn-primary w-100">Proses</button>
+        </div>
     </div>
 </div>
+

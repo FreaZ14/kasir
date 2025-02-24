@@ -19,7 +19,8 @@ class Pembelian extends Model
         'no_faktur', 
         'tanggal', 
         'jumlah', 
-        'total'
+        'total',
+        'harga_jual'
     ];
     public function barang()
     {

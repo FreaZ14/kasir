@@ -10,23 +10,16 @@ use Illuminate\Support\Facades\DB;
 
 class Penjualan extends Component
 {
-    public $id_penjualan, $id_barang, $jumlah, $total;
-    public $detailPenjualan = [];
+    public $id_barang, $jumlah, $total;
     public $pilihanPenjualan = 'tambah';
     public $no_faktur;
     public $tanggal;
-    public $editId;
+    public $produkDitambahkan = [];
 
     public function mount()
     {
-        $this->detailPenjualan = $this->getDetailPenjualan();
         $this->generateNoFaktur();
         $this->tanggal = now()->format('Y-m-d');
-    }
-
-    public function getDetailPenjualan()
-    {
-        return PenjualanModel::with('barang')->latest()->get();
     }
 
     public function generateNoFaktur()
@@ -36,95 +29,57 @@ class Penjualan extends Component
         $this->no_faktur = 'PJ' . sprintf('%06d', intval(substr($lastNoFaktur, 2)) + 1);
     }
 
-    public function tambahPenjualan()
+    public function tambahProduk()
     {
-        //dd($this->id_barang);
         $this->validate([
             'id_barang' => 'required|exists:barang,id',
-            'no_faktur' => 'required',
             'jumlah' => 'required|integer|min:1',
-            'total' => 'required|numeric|min:1',
-            'tanggal' => 'required|date',    
         ]);
-        
-        DB::transaction(function () {
-            $penjualan = PenjualanModel::create([
-                'user_id' => Auth::id(),
-                'id_barang' => $this->id_barang,
-                'no_faktur' => $this->no_faktur,
-                'tanggal' => $this->tanggal,
-                'jumlah' => $this->jumlah,
-                'total' => $this->total,
-            ]);
 
-            $barang = BarangModel::find($this->id_barang);
-            $barang->stok -= $this->jumlah;
-            $barang->save();
+        $barang = BarangModel::find($this->id_barang);
+        if (!$barang) return;    
+        
+        $harga = (int) $barang->harga;
+        $total = $harga * (int) $this->jumlah;
+
+        $this->produkDitambahkan[] = [
+            'id' => $barang->id,
+            'nama' => $barang->nama,
+            'jumlah' => $this->jumlah,
+            'harga' => $barang->harga,
+            'total_harga' => $barang->harga * $this->jumlah, 
+        ];
+
+        $this->reset(['id_barang', 'jumlah']);
+    }
+
+    public function prosesPenjualan()
+    {
+        if (empty($this->produkDitambahkan)) {
+            session()->flash('message', 'Tambahkan produk terlebih dahulu.');
+            return;
+        }
+
+        DB::transaction(function () {
+            foreach ($this->produkDitambahkan as $produk) {
+                PenjualanModel::create([
+                    'user_id' => Auth::id(),
+                    'id_barang' => $produk['id_barang'],
+                    'no_faktur' => $this->no_faktur,
+                    'tanggal' => $this->tanggal,
+                    'jumlah' => $produk['jumlah'],
+                    'total' => $produk['total'],
+                ]);
+
+                $barang = BarangModel::find($produk['id_barang']);
+                $barang->stok -= $produk['jumlah'];
+                $barang->save();
+            }
         });
 
-        $this->reset(['id_barang', 'jumlah', 'total', 'editId']);
-        $this->pilihanPenjualan = 'tambah';
-        session()->flash('message', 'Penjualan berhasil ditambahkan.');
-        $this->detailPenjualan = $this->getDetailPenjualan();
-    }
-
-    public function editPenjualan($id)
-    {
-        $penjualan = PenjualanModel::find($id);
-        if ($penjualan) {
-            $this->editId = $id;
-            $this->id_barang = $penjualan->id_barang;
-            $this->jumlah = $penjualan->jumlah;
-            $this->total = $penjualan->total;
-            $this->pilihanPenjualan = 'edit';
-        }
-    }
-
-    public function updatePenjualan()
-    {
-        $this->validate([
-            'id_barang' => 'required|exists:barang,id',
-            'jumlah' => 'required|integer|min:1',
-            'total' => 'required|numeric|min:1',
-        ]);
-
-        $penjualan = PenjualanModel::find($this->editId);
-        if ($penjualan) {
-            $originalJumlah = $penjualan->jumlah;
-            $penjualan->update([
-                'id_barang' => $this->id_barang,
-                'jumlah' => $this->jumlah,
-                'total' => $this->total,
-            ]);
-
-            $barang = BarangModel::find($this->id_barang);
-            $barang->stok -= $this->jumlah - $originalJumlah;
-            $barang->save();
-
-            $this->reset(['id_barang', 'jumlah', 'total', 'editId']);
-            $this->detailPenjualan = $this->getDetailPenjualan();
-            $this->pilihanPenjualan = 'tambah';
-            session()->flash('message', 'Penjualan berhasil diperbarui.');
-        }
-    }
-
-    public function hapusPenjualan($id)
-    {
-        $penjualan = PenjualanModel::find($id);
-        if ($penjualan) {
-            $barang = BarangModel::find($penjualan->id_barang);
-            $barang->stok += $penjualan->jumlah;
-            $barang->save();
-
-            $penjualan->delete();
-            $this->detailPenjualan = $this->getDetailPenjualan();
-            session()->flash('message', 'Penjualan berhasil dihapus.');
-        }
-    }
-
-    public function pilihPenjualan($pilihan)
-    {
-        $this->pilihanPenjualan = $pilihan;
+        $this->reset(['produkDitambahkan']);
+        $this->generateNoFaktur();
+        session()->flash('message', 'Penjualan berhasil diproses.');
     }
 
     public function render()
@@ -134,9 +89,14 @@ class Penjualan extends Component
             'listBarang' => $listBarang,
             'no_faktur' => $this->no_faktur,
             'tanggal' => $this->tanggal,
-            'pilihanPenjualan' => $this->pilihanPenjualan,
-            'detailPenjualan' => $this->detailPenjualan,
+            'produkDitambahkan' => $this->produkDitambahkan,
         ]);
     }
+        public function hapusProduk($index)
+    {
+        unset($this->produkDitambahkan[$index]);
+        $this->produkDitambahkan = array_values($this->produkDitambahkan);
+    }
+
 }
 

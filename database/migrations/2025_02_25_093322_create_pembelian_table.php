@@ -10,12 +10,12 @@ return new class extends Migration {
         Schema::create('pembelian', function (Blueprint $table) {
             $table->id(); 
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('id_barang')->constrained('barang')->onDelete('cascade');
             $table->string('no_faktur')->unique();
             $table->date('tanggal');
             $table->integer('jumlah');
             $table->decimal('total', 10, 2);
             $table->timestamps();
+            
         });
     }
 

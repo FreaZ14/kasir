@@ -20,6 +20,8 @@ class Pembelian extends Component
     public $kembalian = 0;
     public $total = 0;
     public $detailPembelian = [];
+    public $id_pembelian;
+    public $harga = 0;
 
 
     public function mount()
@@ -50,6 +52,7 @@ class Pembelian extends Component
     public function pilihPembelian($jenis)
     {
         $this->pilihanPembelian = $jenis;
+        
     }
 
     public function tambahProduk()
@@ -76,41 +79,47 @@ class Pembelian extends Component
     }
 
     public function prosesPembelian()
-    {
-        if (empty($this->produkDitambahkan)) {
-            session()->flash('message', 'Tambahkan produk terlebih dahulu.');
-            return;
-        }
-    
-        DB::transaction(function () {
-                PembelianModel::create([
-                    'user_id' => Auth::id(),
-                    'no_faktur' => $this->no_faktur,
-                    'tanggal' => $this->tanggal,
-                    'jumlah' => count ($this->produkDitambahkan),
-                    'total' => 0,
-                ]);
-                foreach ($this->produkDitambahkan as $produk) {
-                DetailPembelianModel::create([
-                    'pembelian_id' => PembelianModel::latest()->first()->id,
-                    'barang_id' => $produk['id'],
-                    'qty' => $produk['jumlah'],
-                    'total' => $produk['total_harga'],
-                ]);
-                
-                $barang = BarangModel::find($produk['id']);
-                if ($barang) {
-                    $barang->stok += $produk['jumlah'];
-                    $barang->save();
-                }
-            }
-        });
-    
-        $this->reset(['produkDitambahkan', 'total', 'dibayar', 'kembalian']);
-        session()->flash('message', 'Pembelian berhasil diproses.');
-        return redirect()->to('/pembelian');
-
+{
+    if (empty($this->produkDitambahkan)) {
+        session()->flash('message', 'Tambahkan produk terlebih dahulu.');
+        return;
     }
+
+    DB::transaction(function () {
+        $pembelian = PembelianModel::create([
+            'user_id' => Auth::id(),
+            'no_faktur' => $this->no_faktur,
+            'tanggal' => $this->tanggal,
+            'jumlah' => count($this->produkDitambahkan),
+            'total' => $this->totalPembelian(), 
+        ]);
+
+        $this->id_pembelian = $pembelian->id;
+
+        foreach ($this->produkDitambahkan as $produk) {
+            DetailPembelianModel::create([
+            'id_pembelian' => $this->id_pembelian, 
+            'id_barang' => $produk['id'],
+            'qty' => $produk['jumlah'], 
+            'harga' => $produk['harga'], 
+            'created_at' => now(),
+            'updated_at' => now(),
+]);
+
+
+            $barang = BarangModel::find($produk['id']);
+            if ($barang) {
+                $barang->stok += $produk['jumlah'];
+                $barang->save();
+            }
+        }
+    });
+
+    $this->reset(['produkDitambahkan', 'total', 'dibayar', 'kembalian', 'id_pembelian']);
+    session()->flash('message', 'Pembelian berhasil diproses.');
+    return redirect()->to('/pembelian');
+}
+
     
     public function hapusProduk($index)
     {
@@ -149,6 +158,11 @@ class Pembelian extends Component
             ->with('barang')
             ->get();
     }
+    public function hapusDetailPembelian()
+    {
+        $this->detailPembelian = [];
+        $barang->stok -= $produk['jumlah'];
+    }
 
     public function render()
     {
@@ -159,4 +173,6 @@ class Pembelian extends Component
         ]);
     }
 }
+
+
 

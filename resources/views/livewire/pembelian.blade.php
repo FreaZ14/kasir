@@ -119,17 +119,23 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Nama Barang</th>
-                        <th>Jumlah</th>
+                        <th>ID</th>
+                        <th>ID Pembelian</th>
+                        <th>Qty</th>
                         <th>Total Harga</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($detailPembelian as $item)
                     <tr>
-                        <td>{{ $item->barang->nama }}</td>
-                        <td>{{ $item->jumlah }}</td>
+                        <td>{{ $item->id }}</td>
+                        <td>{{ $item->id_pembelian }}</td>
+                        <td>{{ $item->qty }}</td>
                         <td>Rp {{ number_format($item->total, 0, ',', '.') }}</td>
+                        <td>
+                            <button wire:click="hapusDetailPenjualan({{ $loop->index }})" class="btn btn-danger btn-sm">Hapus</button>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>

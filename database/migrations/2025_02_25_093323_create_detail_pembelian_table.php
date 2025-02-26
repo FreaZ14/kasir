@@ -14,12 +14,17 @@ return new class extends Migration
         Schema::create('detail_pembelian', function (Blueprint $table) {
             $table->id();
             $table->foreignid('id_pembelian')->constrained('pembelian')->onDelete('cascade');
-            $table->foreignId('id_barang')->constrained('barang')->onDelete('cascade');
+            $table->foreignid('id_barang')->constrained('barang')->onDelete('cascade');
             $table->integer('qty');
             $table->integer('harga')->unsigned();
             $table->timestamps();
         });
     }
+                        // <th>ID</th>
+                        // <th>ID Pembelian</th>
+                        // <th>Nama Barang</th>
+                        // <th>Qty</th>
+                        // <th>Total Harga</th>
 
     /**
      * Reverse the migrations.
